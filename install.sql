@@ -96,6 +96,27 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
+-- View `exchg`.`cpy_cty_cat_vw`
+-- -----------------------------------------------------
+DROP VIEW IF EXISTS `exchg`.`cpy_cty_cat_vw`;
+DROP TABLE IF EXISTS `exchg`.`cpy_cty_cat_vw`;
+
+CREATE OR REPLACE VIEW `exchg`.`cpy_cty_cat_vw`
+AS
+SELECT
+  cp.r_k cmp_id,
+  cp.cpy_id cmp_cde,
+  cp.cpy_bgt cmp_bgt,
+  cp.bid_prc cmp_bd_prc,
+  ca.cat_nme ctg_nme,
+  ct.cty_nme cty_nm,
+  ct.cty_cde cty_code
+FROM cpy_lst cp, cat_lst ca, cpy_cat_lst cca, cty_lst ct, cpy_cty_lst cct
+WHERE cp.r_k = cca.cpy_lst_r_k and ca.r_k = cca.cat_lst_r_k and cp.r_k = cct.cpy_lst_r_k and ct.r_k = cct.cty_lst_r_k;
+
+
+
+-- -----------------------------------------------------
 -- Insert data for cty_lst
 -- -----------------------------------------------------
 INSERT INTO `exchg`.`cty_lst` (`cty_nme`, `cty_cde`) VALUES ('UNITED STATES OF AMERICA', 'US');

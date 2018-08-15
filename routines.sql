@@ -40,8 +40,8 @@ begin
 			leave loop1;
 		end if;
 
-        select count(*) into cty_cnt from cpy_cty_lst where cty_lst_r_k = cty_id and cpy_lst_r_k = cpy_cde;
-        select count(*) into cat_cnt from cpy_cat_lst where cat_lst_r_k = cat_id and cpy_lst_r_k = cpy_cde;
+        select count(*) into cty_cnt from cpy_cty_lst where cty_lst_r_k = cty_id and cpy_lst_r_k = cpy_rk;
+        select count(*) into cat_cnt from cpy_cat_lst where cat_lst_r_k = cat_id and cpy_lst_r_k = cpy_rk;
 
         if lg_dt = 'BaseTargeting: ' then
             set sprtr = '';
@@ -87,6 +87,7 @@ begin
     declare cpy_cd varchar(10);
     declare sprtr varchar(3);
     declare bd_prc decimal(5,2);
+    declare bd_amt decimal(5,2);
     declare avl_bgt decimal(5,2);
     declare nw_arr json default json_array();
     declare mtch_obj json;
@@ -106,11 +107,13 @@ begin
 
 	set cpy_ln = json_length(cpy_dt);
 
+    set bd_amt = bid_amt / 100;
+
     while i < cpy_ln do
         set cpy_rw = json_extract(cpy_dt, concat('$[',i,']'));
 
         set cpy_rk = json_extract(cpy_rw, '$.cpy_rk');
-        set cpy_cd = json_extract(cpy_rw, '$.cpy_id');
+        set cpy_cd = trim(both '"' from json_extract(cpy_rw, '$.cpy_id'));
 
         if lg_dt = 'BudgetCheck: ' or lg_dt = 'BaseBid: ' then
             set sprtr = '';
@@ -119,9 +122,9 @@ begin
         end if;
         
         if prs_typ = 'budget' then
-            select cpy_bgt, bid_prc into avl_bgt from cpy_lst where r_k = cpy_rk;
+            select cpy_bgt into avl_bgt from cpy_lst where r_k = cpy_rk;
 
-            if avl_bgt >= bid_amt then
+            if avl_bgt >= bd_amt then
                 set lg_dt = concat(lg_dt, sprtr,'{', cpy_cd, ', Passed}');
                 set nw_arr = json_array_append(nw_arr, '$', cpy_rw);
             else
@@ -130,13 +133,13 @@ begin
         else
             select bid_prc into bd_prc from cpy_lst where r_k = cpy_rk;
 
-            if bd_prc > bid_amt then
-                set lg_dt = concat(lg_dt, sprtr,'{', cpy_cde, ', Passed}');
+            if bd_prc > bd_amt then
+                set lg_dt = concat(lg_dt, sprtr,'{', cpy_cd, ', Passed}');
                 set cpy_rw = json_set(cpy_rw, '$.bd_prc', bd_prc);
 
                 set nw_arr = json_array_append(nw_arr, '$', cpy_rw);
             else
-                set lg_dt = concat(lg_dt, sprtr,'{', cpy_cde, ', Failed}');
+                set lg_dt = concat(lg_dt, sprtr,'{', cpy_cd, ', Failed}');
             end if;
         end if;
 
@@ -200,7 +203,7 @@ begin
 	end;
 
 	if enty_typ = 'country' then
-        select count(*) into cnt from cty_lst where cty_nme = enty_vl;
+        select count(*) into cnt from cty_lst where cty_cde = enty_vl;
         if cnt = 1 then
             select r_k into prc_stt from cty_lst where cty_cde = enty_vl;
         else
