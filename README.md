@@ -1,5 +1,7 @@
 ## Mini Stock Exchange - MySQL Database Setup
 
+This is the database setup guidelines
+
 ## Requirements
 
 This project requires MySQL Community Server of version 5.7.8 or higher. 
