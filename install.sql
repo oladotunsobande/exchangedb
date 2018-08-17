@@ -410,7 +410,7 @@ begin
         rollback;
 	end;
 
-	update cpy_lst set cpy_bgt = cpy_bgt - bid_amt where r_k = cpy_r_k;
+	update cpy_lst set cpy_bgt = cpy_bgt - bid_amt where r_k = cpy_rk;
     
     commit;
 
